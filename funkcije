@@ -1,0 +1,73 @@
+def generate_subcubic_graphs(n):
+""" Naredi vse subkubične grafe z n vozlišči"""
+    return [G for G in graphs.nauty_geng(f"{n} -c -D3")]
+
+def narisi_grafe(n):
+""" Nariše vse subkubične grafe grafe z n vozlišči"""
+    subcubic_graphs = generate_subcubic_graphs(n)
+    for i, graph in enumerate(subcubic_graphs):
+        print(f"Graph {i + 1}:")
+        cleaned_edges = [(u, v) for u, v, *_ in graph.edges()]
+        print("Edges:", cleaned_edges)
+        graph.show(title=f"Graph {i + 1}", vertex_size=300, vertex_color="gold")
+
+
+### To še nism zihr če je prou ###
+def minimal_packing_coloring(graph):
+    """
+    Finds the minimal packing coloring for the given graph.
+    
+    Parameters:
+    - graph: A SageMath graph object.
+    
+    Returns:
+    - A tuple (min_color, coloring), where:
+        - min_color is the smallest maximum color used.
+        - coloring is a dictionary mapping vertices to colors.
+    """
+    def is_valid_coloring(coloring, max_color):
+        """Checks if a given coloring satisfies the packing constraints."""
+        for color in range(1, max_color + 1):
+            same_color_vertices = [v for v in graph.vertices() if coloring[v] == color]
+            for u in same_color_vertices:
+                for v in same_color_vertices:
+                    if u != v and graph.distance(u, v) <= color:
+                        return False
+        return True
+
+    def try_coloring(max_color):
+        """Attempts to find a valid coloring with at most max_color."""
+        vertices = graph.vertices()
+        coloring = {v: None for v in vertices}
+
+        def assign_colors(index):
+            if index == len(vertices):  # All vertices are colored
+                return is_valid_coloring(coloring, max_color)
+            
+            vertex = vertices[index]
+            for color in range(1, max_color + 1):
+                coloring[vertex] = color
+                if assign_colors(index + 1):
+                    return True
+                coloring[vertex] = None  # Backtrack
+            return False
+
+        if assign_colors(0):
+            return coloring
+        return None
+
+    # Binary search for the minimal color
+    low, high = 1, len(graph.vertices())
+    best_coloring = None
+    while low <= high:
+        mid = (low + high) // 2
+        coloring = try_coloring(mid)
+        if coloring:
+            best_coloring = coloring
+            high = mid - 1  # Try smaller maximum color
+        else:
+            low = mid + 1  # Increase the maximum color
+
+    return (low, best_coloring)
+
+
