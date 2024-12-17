@@ -1,9 +1,9 @@
 def generate_subcubic_graphs(n):
-""" Naredi vse subkubične grafe z n vozlišči"""
+""" Generates all subcubic graphs with n vertices"""
     return [G for G in graphs.nauty_geng(f"{n} -c -D3")]
 
 def narisi_grafe(n):
-""" Nariše vse subkubične grafe grafe z n vozlišči"""
+""" Draws all subcubic graphs with n vestices"""
     subcubic_graphs = generate_subcubic_graphs(n)
     for i, graph in enumerate(subcubic_graphs):
         print(f"Graph {i + 1}:")
@@ -12,62 +12,68 @@ def narisi_grafe(n):
         graph.show(title=f"Graph {i + 1}", vertex_size=300, vertex_color="gold")
 
 
-### To še nism zihr če je prou ###
-def minimal_packing_coloring(graph):
-    """
-    Finds the minimal packing coloring for the given graph.
-    
-    Parameters:
-    - graph: A SageMath graph object.
-    
-    Returns:
-    - A tuple (min_color, coloring), where:
-        - min_color is the smallest maximum color used.
-        - coloring is a dictionary mapping vertices to colors.
-    """
-    def is_valid_coloring(coloring, max_color):
-        """Checks if a given coloring satisfies the packing constraints."""
-        for color in range(1, max_color + 1):
-            same_color_vertices = [v for v in graph.vertices() if coloring[v] == color]
-            for u in same_color_vertices:
-                for v in same_color_vertices:
-                    if u != v and graph.distance(u, v) <= color:
-                        return False
-        return True
+def FloydWarshall(G, c):
+""" Draws all subcubic graphs with n vestices"""
+    razdalja = {u:{v:0 if u == v else float('inf') for v in G.vertices()} for u in G.vertices()}
+    prednik = {u:{v:None for v in G.vertices()} for u in G.vertices()}
+    for u in G.vertices():
+        for v in G.neighbors(u):
+            razdalja[u][v] = c[u + v]
+            prednik[u][v] = u
+    for w in G.vertices():
+        for u in G.vertices():
+            for v in G.vertices():
+                r = razdalja[u][w] + razdalja[w][v]
+                if r < razdalja[u][v]:
+                    razdalja[u][v] = r
+                    prednik[u][v] = prednik[w][v]
+    return (razdalja, prednik)
 
-    def try_coloring(max_color):
-        """Attempts to find a valid coloring with at most max_color."""
-        vertices = graph.vertices()
-        coloring = {v: None for v in vertices}
+# Load the graph library
+G = graphs.CompleteGraph(5)  # Example graph (replace this with your own graph)
+V = G.vertices()
+E = G.edges(labels=False)
 
-        def assign_colors(index):
-            if index == len(vertices):  # All vertices are colored
-                return is_valid_coloring(coloring, max_color)
-            
-            vertex = vertices[index]
-            for color in range(1, max_color + 1):
-                coloring[vertex] = color
-                if assign_colors(index + 1):
-                    return True
-                coloring[vertex] = None  # Backtrack
-            return False
+b = 7  # Maximum number of colors to test
 
-        if assign_colors(0):
-            return coloring
-        return None
+# Initialize the ILP problem
+p = MixedIntegerLinearProgram(maximization=False)
+X = p.new_variable(binary=True)  # X_h: Binary variables for color usage
+Y = p.new_variable(binary=True)  # Y_i^h: Binary variables for vertex-color assignment
+Z = p.new_variable(binary=True)  # Z_i,j^h Binary variables for vertex-vertex-color assignment
+C = FloydWarshal(G, c)
 
-    # Binary search for the minimal color
-    low, high = 1, len(graph.vertices())
-    best_coloring = None
-    while low <= high:
-        mid = (low + high) // 2
-        coloring = try_coloring(mid)
-        if coloring:
-            best_coloring = coloring
-            high = mid - 1  # Try smaller maximum color
-        else:
-            low = mid + 1  # Increase the maximum color
+# Objective Function: Minimize the number of colors used
+p.set_objective(p.sum(X[k] for k in range(1, b+1)))
 
-    return (low, best_coloring)
+# Constraint 1: If the smaller number is not used, the bigger also will not be used
+for i in V:
+    p.add_constraint(X[k] >= X[k+1] for k in range(1, b-1))
+
+# Constraint 2: Vertices of the same 
+for i in V:
+    for j in V:
+        p.add_constraint(Z[i, j, k] <= Y[i, k] for k in range (1, b))
+        p.add_constraint(Z[i, j, k] <= Y[i, k] for k in range (1, b))
+        p.add_constraint(Z[i, j, k] >= Y[i, k] +Y[j, k] - 1 for k in range (1, b))
 
 
+# Constraint 3: If vertex i is assigned color h, color h must be used
+for h in range(1, b+1):
+    for i in V:
+        p.add_constraint(Y[i, h] <= X[h])
+        
+# Constraint 4: Vertices of the same color must be at least i + 1 edges apart
+for i in V:
+    for j in V:
+        p.add_constraint(C[i, j] >= (k + 1)*Z[i, j, k] for k in range (1, b))
+
+# Solve the ILP
+solution = p.solve()
+
+# Display results
+print("Minimum number of colors used:", sum(p.get_values(X[h]) for h in range(1, b+1)))
+for i in V:
+    for h in range(1, b+1):
+        if p.get_values(Y[i, h]) > 0.5:
+            print(f"Vertex {i} is assigned color {h}")
