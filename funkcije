@@ -12,76 +12,61 @@ def narisi_grafe(n):
         graph.show(title=f"Graph {i + 1}", vertex_size=300, vertex_color="gold")
 
 
-def FloydWarshall(G, c):
-    """ Draws all subcubic graphs with n vestices"""
-    distance = {u:{v:0 if u == v else float('inf') for v in G.vertices()} for u in G.vertices()}
-    for u in G.vertices():
-        for v in G.neighbors(u):
-            distance[u][v] = c[u][v]
-    for w in G.vertices():
-        for u in G.vertices():
-            for v in G.vertices():
-                r = distance[u][w] + distance[w][v]
-                if r < distance[u][v]:
-                    distance[u][v] = r
-    return distance
-
-def neighbor_matrix(G):
+n = 5
+for graph in generate_subcubic_graphs(n):
+    G = graph  
+    V = G.vertices()
+#E = G.edges(labels=False)
     n = len(G.vertices())
-    c = zero_matrix(ZZ, n, n)
-    for el in G.edges():
-        c[el[0], el[1]] = 1
-        c[el[1], el[0]] = 1
-    return c
 
-# Load the graph library
-G = graphs.PetersenGraph()  # Example graph (replace this with your own graph)
-V = G.vertices()
-E = G.edges(labels=False)
-c = neighbor_matrix(G)
-
-b = 7  # Maximum number of colors to test
+    b = 10  # Maximum number of colors to test
 
 # Initialize the ILP problem
-p = MixedIntegerLinearProgram(maximization=False)
-X = p.new_variable(binary=True)  # X_h: Binary variables for color usage
-Y = p.new_variable(binary=True)  # Y_i^h: Binary variables for vertex-color assignment
-Z = p.new_variable(binary=True)  # Z_i,j^h Binary variables for vertex-vertex-color assignment
-C = FloydWarshall(G, c)
+    p = MixedIntegerLinearProgram(maximization=False)
+    X = p.new_variable(binary=True)  # X_h: Binary variables for color usage
+    Y = p.new_variable(binary=True)  # Y_i^h: Binary variables for vertex-color assignment
+    Z = p.new_variable(binary=True)  # Z_i,j^h Binary variables for vertex-vertex-color assignment
+    C = G.distance_matrix()
 
 # Objective Function: Minimize the number of colors used
-p.set_objective(p.sum(X[k] for k in range(1, b+1)))
+    p.set_objective(p.sum(X[k] for k in range(1, b)))
 
-# Constraint 1: If the smaller number is not used, the bigger also will not be used
-for k in range(1, b-1):
-    p.add_constraint(X[k] >= X[k+1])
+# Constraint 1: If the color k is not used, the color k+1 will also not be used
+    for k in range(1, b):
+        p.add_constraint(X[k] >= X[k+1])
 
-# Constraint 2: Vertices of the same 
-for i in V:
-    for j in V:
-        for k in range (1, b):
-            p.add_constraint(Z[i, j, k] <= Y[i, k])
-            p.add_constraint(Z[i, j, k] <= Y[i, k])
-            p.add_constraint(Z[i, j, k] >= Y[i, k] + Y[j, k] - 1)
-
-
-# Constraint 3: If vertex i is assigned color h, color h must be used
-for h in range(1, b+1):
+# Constraint 2: Ensure consistency between Z and Y variables
     for i in V:
-        p.add_constraint(Y[i, h] <= X[h])
+        for j in V:
+            if i != j:
+                for k in range (1, b+1):
+                    p.add_constraint(Z[i, j, k] <= Y[i, k])
+                    p.add_constraint(Z[i, j, k] <= Y[j, k])
+                    p.add_constraint(Z[i, j, k] >= (Y[i, k] + Y[j, k] - 1))
+
+
+# Constraint 3: If vertex i is assigned color k, color k must be used
+    for k in range(1, b+1):
+        for i in V:
+            p.add_constraint(Y[i, k] <= X[k])
         
 # Constraint 4: Vertices of the same color must be at least i + 1 edges apart
-for i in V:
-    for j in V:
-        for k in range (1, b):
-            p.add_constraint(C[i, j] >= (k + 1)*Z[i, j, k])
+    for i in V:
+        for j in V:
+            for k in range (1, b+1):
+                p.add_constraint(C[i][j] >= ((k + 1)*Z[i, j, k]))
 
+# Constraint 5: Every vertex must be colored
+    for i in V:
+        p.add_constraint(p.sum(Y[i, k] for k in range(1, b+1)) == 1)  # Use sum() instead of p.sum()
+            
 # Solve the ILP
-solution = p.solve()
+    solution = p.solve()
 
 # Display results
-print("Minimum number of colors used:", sum(p.get_values(X[h]) for h in range(1, b+1)))
-for i in V:
-    for h in range(1, b+1):
-        if p.get_values(Y[i, h]) > 0.5:
-            print(f"Vertex {i} is assigned color {h}")
+    graph.show(title=f"Graph {i + 1}", vertex_size=300, vertex_color="gold")
+    print("Minimum number of colors used:", sum(p.get_values(X[k]) for k in range(1, b+1)))
+    for i in V:
+        for k in range(1, b+1):
+            if p.get_values(Y[i, k]) > 0.5:  # Ensure binary condition
+                print(f"Vertex {i} is assigned color {k}")
