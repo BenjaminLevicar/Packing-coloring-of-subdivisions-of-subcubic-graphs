@@ -1,0 +1,46 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[slovene]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\begin{document}
+
+\title{Pakirno kromatično barvanje subdivizij subkubičnih grafov}
+\author{Benjamin Levičar, Jan Nabergoj}
+
+\maketitle
+
+\section{Opis problema}
+
+Preveriti  želimo domnevo: \emph{Za vsako subdivizijo subkubičnega grafa $G$ velja $\chi_\rho(S(G)) \leq 5$}. Tega se bomo lotili z iskanjem protiprimera, torej želimo poiskati subdivizijo subkubičnega grafa, ki ima pakirno kromatično število vsaj 6.
+
+Razložimo najprej pojme iz domneve:
+\begin{itemize}
+    \item \emph{Subdivizija $S(G)$ grafa $G$} je graf dobljen tako, da namesto vsake povezave v grafu $G$ postavimo vozlišče in ga povežemo z vozliščema,
+          ki sta bila krajišči odstranjene povezave. Nova vozlišča so tako stopnje $2$.
+    \item \emph{Subkubičen graf} je graf v katerem imajo vozlišča stopnjo največ $3$.
+    \item \emph{Pakirno kromatično barvanje} je barvanje grafa $G$ z barvami $1, 2, \dots$ za katerega velja, da za poljubni vozlišči $u, v$ barve $i$ velja $d(u, v) > i$.
+          Najmanjše število barv potrebnih za to imenujemo \emph{Pakirno kromatično število} grafa, označimo ga $\chi_\rho(G)$.
+\end{itemize}
+
+
+\section{Potek dela}
+
+Najprej bomo implementirali celoštevilski linearni program, ki nam bo poiskal pakirmo kromatično število danega grafa. 
+
+\begin{enumerate}
+    \item Domnevo bomo najprej sistematično preverili za vse manjše grafe (recimo do 15 vozlišč). Torej zgenerirali bomo vse grave in na njihovih subdivizijah pognali CLP za iskanje pakirnega kromatičnega števila.
+    \item Za večje grafe bomo uporabili metodo stohastičnega iskanja. To storimo saj je grafov z več vozližči zelo veliko in bi nam sistematično iskanje vzelo preveč časa. Grafe bomo generirali naključno in iskali njihova pakirna kromatična števila.
+    \item Dobljene rezultate iz prejšnjih točk bomo analizirali in poskušali poiskati kakšne skupne lastnosti grafov z največjim pakirnom kromatičnim številom. Nato bomo znova uporabili stohastično iskanje na grafih z enakimi lastnostmi.
+\end{enumerate}
+
+Da bo iskanje bolj učinkvito bomo pobrskali po literaturi in poiskati kakšne lastnosti grafov, ki nam zagotovijo, da bo pakirno kromatično število majhno
+oz. manjše od $5$.
+
+
+
+
+\end{document}
