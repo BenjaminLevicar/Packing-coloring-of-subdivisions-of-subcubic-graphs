@@ -2,9 +2,37 @@ def generate_subcubic_graphs(n):
 """ Generates all subcubic graphs with n vertices"""
     return [G for G in graphs.nauty_geng(f"{n} -c -D3")]
 
+def subdivisions(graphs):
+    """Makes subdivisions of all graphs in the list"""
+    sub_graphs = []
+    for graph in graphs:
+        i = graph.num_verts()
+        new_graph = graph.copy()
+        edges_to_remove = []  
+        new_edges = []  
+
+        for u, v, label in graph.edges():  
+            new_vertex = i # Name the new vertex based on the edge
+            i += 1
+            new_graph.add_vertex(new_vertex)  
+            new_edges.append((u, new_vertex))  
+            new_edges.append((new_vertex, v))  
+            edges_to_remove.append((u, v))  
+
+            # Add all new edges
+            new_graph.add_edges(new_edges)
+
+            # Remove all old edges
+            new_graph.delete_edges(edges_to_remove)
+        sub_graphs.append(new_graph)
+        
+
+    return(sub_graphs)
+
 def narisi_grafe(n):
 """ Draws all subcubic graphs with n vestices"""
     subcubic_graphs = generate_subcubic_graphs(n)
+    # subcubic_graphs = subdivisions(subcubic_graphs) # Če hočemo narisati subdivizije grafov
     for i, graph in enumerate(subcubic_graphs):
         print(f"Graph {i + 1}:")
         cleaned_edges = [(u, v) for u, v, *_ in graph.edges()]
