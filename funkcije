@@ -73,13 +73,11 @@ def modify_graph(G, n):
     
     while not G.is_connected() or not is_subcubic(G):
         if not G.is_connected():
-            print('Not connected')
             components = list(G.connected_components(sort=True))
             u, v = random.choice(list(components[0])), random.choice(list(components[1]))
             G.add_edge(u, v)
             added_edges.add((u, v)) 
         elif not is_subcubic(G):
-            print('Not subcubic')
             (u, v, *_) = random.choice(list(G.edges()))
             G.delete_edge(u, v)
             added_edges.discard((u, v))  
