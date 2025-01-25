@@ -86,6 +86,71 @@ def modify_graph(G, n):
 
 
 
+n = 11
+G = generate_random_subcubic_graph(n)
+num_steps = 200
+target_packing_coloring = 6
+previous_packing_coloring = 0
+previous_graph = G 
+step = 0
+invalid_steps = 0 
+packing_coloring = 0
+i=1
+
+while step < num_steps and invalid_steps < 10000: 
+    print(i)
+    i+=1
+    new_G = modify_graph(G.copy(), n)  
+    
+    if previous_graph.is_isomorphic(new_G):
+        invalid_steps += 1 
+        continue 
+        
+    new_G = subdivizija(new_G)
+    packing_coloring = pakirno_stevilo(new_G, 7)
+    
+    if packing_coloring < previous_packing_coloring:
+        invalid_steps += 1
+        continue
+    
+    previous_packing_coloring = packing_coloring
+    step += 1
+    invalid_steps = 0
+    
+    print(f"Step {step}: Packing coloring number: {packing_coloring}")
+    
+    new_G.plot(
+    layout="spring",                # Use the spring layout
+    vertex_size=500,                # Set the vertex size
+    vertex_color="lightblue",       # Set the vertex color
+    vertex_labels=True,             # Show vertex labels
+    vertex_label_color="black",     # Label color
+    vertex_label_size=12,           # Label size
+    edge_color="gray",              # Edge color
+    edge_thickness=1.5,             # Edge thickness
+    title=f"Graph at step {step}",  # Add title
+    figsize=[6, 6]      # Set the figure size
+    ).show()
+
+    #plt.figure(figsize=(6, 6))
+    #pos = new_G.spring_layout()  
+    #new_G.plot(pos, with_labels=True, node_color='lightblue', node_size=500, font_size=12, font_weight='bold', edge_color='gray')
+    #plt.title(f"Graph at step {step}")
+    #plt.show()
+    
+    if packing_coloring == target_packing_coloing:
+        print(f"Target reached at step {step}")
+        break
+
+    G = new_G
+    previous_graph = new_G  
+
+new_G.plot()
+if invalid_steps >= 10000:
+    print("No new valid graphs after 10000 steps, stopping.")
+
+
+
 
 n = 5
 for graph in generate_subcubic_graphs(n):
