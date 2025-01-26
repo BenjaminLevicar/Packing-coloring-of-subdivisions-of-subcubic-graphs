@@ -1,12 +1,25 @@
+import random
+import matplotlib.pyplot as plt
+
 def generate_subcubic_graphs(n):
-""" Generates all subcubic graphs with n vertices"""
+    """ Generates all subcubic graphs with n vertices"""
     return [G for G in graphs.nauty_geng(f"{n} -c -D3")]
 
 
+def is_subcubic(G):
+    """Checks if the graph G is subcubic"""
+    max_degree = max(G.degree_iterator())
+    return max_degree < 4
+
+def subdivizija(G):
+    """Makes a subdivision of a given graph"""
+    H = G.copy()
+    H.subdivide_edges(G.edges(), 1)
+    return H
 
 
 def narisi_grafe(n):
-""" Draws all subcubic graphs with n vestices"""
+    """ Draws all subcubic graphs with n vestices"""
     subcubic_graphs = generate_subcubic_graphs(n)
     # subcubic_graphs = subdivisions(subcubic_graphs) # Če hočemo narisati subdivizije grafov
     for i, graph in enumerate(subcubic_graphs):
@@ -18,9 +31,8 @@ def narisi_grafe(n):
 
 
 
-
 def random_subcubic_graph(n):
-"""Randomly generates a subcubic graph on n vertices"""
+    """Generates a random subcubic graph on n vertices"""
     # Initialize a graph with n vertices and no edges
     G = Graph(n)
 
@@ -51,9 +63,8 @@ def random_subcubic_graph(n):
 
 
 
-
-
 def modify_graph(G, n):
+    """Adds or removes an edge so that the graph stays connected and subcubic"""
     action = random.choice(['add', 'remove'])
     
     added_edges = set(G.edges())
