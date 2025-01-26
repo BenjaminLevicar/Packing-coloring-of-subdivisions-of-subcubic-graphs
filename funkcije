@@ -53,7 +53,7 @@ def random_subcubic_graph(n):
         if not possible_edges:
             break
         
-        # Choose a random edge
+        # Choose a random edge to add
         u, v = random.choice(possible_edges)
         G.add_edge(u, v)
         degrees[u] += 1
@@ -65,31 +65,32 @@ def random_subcubic_graph(n):
 
 def modify_graph(G, n):
     """Adds or removes an edge so that the graph stays connected and subcubic"""
-    action = random.choice(['add', 'remove'])
+    action = random.choice(['add', 'remove']) # Makes a random choice to either add or remove an edge
     
     added_edges = set(G.edges())
     
     if action == 'add':
-        possible_edges = [(u, v) for u in range(n) for v in range(u + 1, n) if (u, v) not in added_edges and not G.has_edge(u, v)]
+        possible_edges = [(u, v) for u in range(n) for v in range(u + 1, n) if (u, v) not in added_edges and not G.has_edge(u, v)] # Makes a list of all empty edges
         
         if possible_edges:
-            u, v = random.choice(possible_edges)
+            u, v = random.choice(possible_edges) # Ramdomly picks an empty edge to add
             G.add_edge(u, v)
             added_edges.add((u, v)) 
     
     elif action == 'remove':
-        (u, v, *_) = random.choice(list(G.edges()))
+        (u, v, *_) = random.choice(list(G.edges())) # picks an edge to remove
         G.delete_edge(u, v)
         added_edges.discard((u, v))
-    
+
+    # Checks if the graph is connected and subcubic. If not, it changes it until it is
     while not G.is_connected() or not is_subcubic(G):
         if not G.is_connected():
             components = list(G.connected_components(sort=True))
-            u, v = random.choice(list(components[0])), random.choice(list(components[1]))
+            u, v = random.choice(list(components[0])), random.choice(list(components[1])) # Adds an edge to connect 2 components if graph is not connected 
             G.add_edge(u, v)
             added_edges.add((u, v)) 
         elif not is_subcubic(G):
-            (u, v, *_) = random.choice(list(G.edges()))
+            (u, v, *_) = random.choice(list(G.edges())) # Removes a random edge
             G.delete_edge(u, v)
             added_edges.discard((u, v))  
     
@@ -99,14 +100,13 @@ def modify_graph(G, n):
 
 n = 16
 G = random_subcubic_graph(n)
-num_steps = 20
+num_steps = 20 # How many iteration do we want to make
 target_packing_coloring = 6
 previous_packing_coloring = 0
-previous_graph = G 
 step = 0
 invalid_steps = 0 
 packing_coloring = 0
-i=1
+i=1 # To mam sam notr da vem da se kej dogaja
 
 while step < num_steps and invalid_steps < 10000: 
     print(i)
@@ -144,12 +144,6 @@ while step < num_steps and invalid_steps < 10000:
     #figsize=[6, 6]      # Set the figure size
     #).show()
     new_G.show()
-
-    #plt.figure(figsize=(6, 6))
-    #pos = new_G.spring_layout()  
-    #new_G.plot(pos, with_labels=True, node_color='lightblue', node_size=500, font_size=12, font_weight='bold', edge_color='gray')
-    #plt.title(f"Graph at step {step}")
-    #plt.show()
     
     if packing_coloring == target_packing_coloring:
         print(f"Target reached at step {step}")
