@@ -98,19 +98,20 @@ def modify_graph(G, n):
 
 
 
-n = 16
+n = 5
 G = random_subcubic_graph(n)
-num_steps = 20 # How many iteration do we want to make
+num_steps = 6
 target_packing_coloring = 6
 previous_packing_coloring = 0
+previous_graph = G 
 step = 0
 invalid_steps = 0 
 packing_coloring = 0
-i=1 # To mam sam notr da vem da se kej dogaja
+slovar_slovarjev_barv = []
+i=1
 
 while step < num_steps and invalid_steps < 10000: 
     print(i)
-    i+=1
     new_G = modify_graph(G.copy(), n)  
     
     #if previous_graph.is_isomorphic(new_G):
@@ -118,8 +119,9 @@ while step < num_steps and invalid_steps < 10000:
       #  continue 
         
     new_Gi = subdivizija(new_G)
-    packing_coloring = pakirno_stevilo(new_Gi, 7)
-    print(packing_coloring)
+    (f, packing_coloring, slovar) = poisci_pakirno_stevilo(new_Gi, 7, 3)
+    seznam_slovarjev_barv.append(slovar)
+    i+=1
     
     #if packing_coloring < previous_packing_coloring:
      #   invalid_steps += 1
@@ -144,6 +146,12 @@ while step < num_steps and invalid_steps < 10000:
     #figsize=[6, 6]      # Set the figure size
     #).show()
     new_G.show()
+
+    #plt.figure(figsize=(6, 6))
+    #pos = new_G.spring_layout()  
+    #new_G.plot(pos, with_labels=True, node_color='lightblue', node_size=500, font_size=12, font_weight='bold', edge_color='gray')
+    #plt.title(f"Graph at step {step}")
+    #plt.show()
     
     if packing_coloring == target_packing_coloring:
         print(f"Target reached at step {step}")
@@ -153,9 +161,9 @@ while step < num_steps and invalid_steps < 10000:
     previous_graph = new_G  
 
 new_G.plot()
+print(seznam_slovarjev_barv)
 if invalid_steps >= 10000:
     print("No new valid graphs after 10000 steps, stopping.")
-
 
 
 
