@@ -28,7 +28,33 @@ def narisi_grafe(n):
         print("Edges:", cleaned_edges)
         graph.show(title=f"Graph {i + 1}", vertex_size=300, vertex_color="gold")
 
-
+def random_cubic_graphs(zacetno_stevilo_vozlisc, koncno_stevilo_vozlisc, zeljeno_barvanje):    
+    if zacetno_stevilo_vozlisc % 2 != 0:
+        print('Zacetno stevilo vozlišč mora biti sodo')# Kubični grafi so lahko samo tisi, ki majo sodo število vozlišč
+        return None
+    n = zacetno_stevilo_vozlisc
+    list_of_graphs = []
+    invalid_steps = 0
+    
+    while n <= koncno_stevilo_vozlisc:
+        while invalid_steps < 10: # To povečava ko povečava število vozlišč
+            G = graphs.RandomRegular(3, n)
+            stevilo = invalid_steps
+            if G.is_bipartite():
+                continue
+            for graph in list_of_graphs:    
+                if G.is_isomorphic(graph) == True:
+                    invalid_steps += 1
+                    break
+            if stevilo != invalid_steps:
+                continue
+            new_G = subdivizija(G)
+            (a,coloring,b) = poisci_pakirno_stevilo(new_G, 7, 3)
+            list_of_graphs.append(G)
+            if coloring >= zeljeno_barvanje:
+                return G
+        n += 2
+    print('Končano')   
 
 
 def random_subcubic_graph(n):
