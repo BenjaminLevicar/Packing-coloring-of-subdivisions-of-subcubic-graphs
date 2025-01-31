@@ -1,5 +1,5 @@
 # Pakirno število subdivizij subkubičnih grafov
-Preveriti  želimo domnevo: za vsako subdivizijo subkubičnega grafa $G$ velja $\chi_\rho(S(G)) \leq 5$. Kjer je $S(G)$ subdivizija, ki jo dobimo iz G tako da subdividiramo vsako povezavo natanko enkrat. $\chi_\rho$ pa označuje pakirno število, to je najmanjše število $i$, da se lahko množico vozlišč grafa razdeli na disjunktne podmnožice $X_1, X_2, \dots, X_i$ ter da za vsaki vozlišči $u, v \in X_k$ velja $d_G(u, v) > k$ za $k \in \{1, 2, \dots, i\}$.
+Preveriti  želimo domnevo: za vsako subdivizijo subkubičnega grafa $G$ velja $\chi_\rho(S(G)) \leq 5$. Kjer je $S(G)$ subdivizija, ki jo dobimo iz G tako da subdividiramo vsako povezavo natanko enkrat. $\chi_\rho$ pa označuje pakirno število, to je najmanjše število $i$, da se lahko množico vozlišč grafa razdeli na disjunktne podmnožice $X_1, X_2, \dots, X_i$ ter da za vsaki vozlišči $u, v \in X_k$ velja $d_G(u, v) > k$ za $k \in {1, 2, \dots, i}$.
 
 Tega se bomo lotili z iskanjem protiprimera, torej želimo poiskati subdivizijo subkubičnega grafa, ki ima pakirno kromatično število vsaj 6.
 
